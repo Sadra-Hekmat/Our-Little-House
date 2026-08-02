@@ -1,0 +1,44 @@
+{
+  "name": "our-little-house",
+  "version": "0.0.1",
+  "private": true,
+  "description": "A small, emotional pixel-art home that can be revisited in a browser.",
+  "type": "module",
+  "engines": {
+    "node": ">=24.14.0 <25"
+  },
+  "packageManager": "npm@11.9.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:bundle": "node scripts/assert-production-bundle.mjs",
+    "validate:content": "node scripts/validate-content.mjs --mode=development",
+    "validate:content:production": "node scripts/validate-content.mjs --mode=production",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "evidence:phase0": "playwright test tests/e2e/phase0-evidence.spec.ts",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run validate:content && npm run build && npm run test:bundle"
+  },
+  "dependencies": {
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.62.1",
+    "@types/node": "24.13.3",
+    "@types/pngjs": "6.0.5",
+    "eslint": "10.8.0",
+    "globals": "17.8.0",
+    "pngjs": "7.0.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.65.0",
+    "vite": "8.2.0",
+    "vitest": "4.1.10"
+  }
+}

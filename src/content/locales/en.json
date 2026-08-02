@@ -1,0 +1,6 @@
+{
+  "gameTitle": "Our Little House",
+  "subtitle": "{{SUBTITLE_TO_BE_PROVIDED}}",
+  "loading": "Opening the door…",
+  "rendererError": "The room could not open. Please retry or return to the start."
+}
