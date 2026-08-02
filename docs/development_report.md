@@ -4,7 +4,7 @@
 
 - **Phase:** 0 — Repository Foundation and Renderer Spike
 - **Status:** Complete
-- **Completed:** 2026-08-01
+- **Completed:** 2026-08-02
 - **Executor:** Codex
 - **Source requirements:** `requirement.md`
 - **Source plan:** `docs/plan.md`
@@ -33,6 +33,10 @@ actions.
   related tokens do not enter the production bundle.
 - Added development content validation, unit tests, Playwright browser coverage, pixel-based
   first-frame assertions, renderer screenshots, and two GitHub Actions verification jobs.
+- Added the missing repository hygiene files, removed generated dependencies and macOS metadata
+  from version control, and installed an enforced project map and route registry in `CLAUDE.md`.
+- Added production-preview probes for every Phase 0 route and query variant, plus a cache-empty CI
+  job that verifies the pinned Node/npm versions before installing the lockfile.
 
 ## 3. Architecture and Decisions
 
@@ -57,25 +61,27 @@ relative imports across `app`, `game`, `ui`, `content`, `map`, and `storage`.
 | Playwright Test                          | 1.62.1                |
 | ESLint                                   | 10.8.0                |
 | Prettier                                 | 3.9.6                 |
-| Local headless Chromium evidence runtime | 149.0.7827.0          |
+| Local headless Chromium evidence runtime | 151.0.7922.34         |
 
 GitHub CI installs Playwright's Chromium version associated with Playwright Test 1.62.1.
 
 ## 4. Commands and Tests Run
 
-All commands below exited `0`, including a cache-empty copy at `/tmp/tmp.RkeUHGAiMv` containing no
-`node_modules`, `dist`, prior test results, or reference uploads.
+All commands below exited `0`, including a fresh cache-empty clone made after the repository
+hygiene correction. It contained no `node_modules`, `dist`, browser reports, or prior test results.
 
 | Command                            | Result                                                                  |
 | ---------------------------------- | ----------------------------------------------------------------------- |
-| `npm ci --ignore-scripts`          | 148 packages installed from the committed lockfile                      |
+| `npm ci`                           | 148 packages installed from the committed lockfile                      |
 | `npm run format:check`             | All tracked project files formatted                                     |
+| `npm run check:registry`           | `/` and `/game` match the authoritative route registry                  |
 | `npm run lint`                     | Zero errors and zero warnings                                           |
 | `npm run typecheck`                | Strict application and tool configuration passed                        |
 | `npm test`                         | 4 state-controller tests passed                                         |
 | `npm run validate:content`         | 1 locale validated; 1 approved development placeholder reported         |
 | `npm run build`                    | Vite production build completed; total `dist` size approximately 1.2 MB |
 | `npm run test:bundle`              | 3 release assets contain no forbidden diagnostics/failure tokens        |
+| `npm run test:preview`             | 4 direct route/query probes served the production application shell     |
 | `npm audit --audit-level=critical` | 0 vulnerabilities at all reported severities                            |
 | `npm run test:e2e`                 | 12 Chromium tests passed in the working tree and cache-empty copy       |
 
@@ -94,7 +100,8 @@ All commands below exited `0`, including a cache-empty copy at `/tmp/tmp.RkeUHGA
 ## 5. Security and Privacy Review
 
 - A source scan found no credentials, private keys, analytics SDKs, or tracking endpoints.
-- No `.env` file or secret-bearing example is included.
+- Real environment files are ignored; `.env.example` documents that Phase 0 requires no variables
+  and contains no values.
 - Content is inserted with `textContent` or constructed DOM nodes; `innerHTML`, `eval`,
   `new Function`, and `document.write` are lint-blocked.
 - The lockfile is committed, CI runs critical-level dependency audit, and the current audit reports
@@ -135,9 +142,9 @@ No reference-site image, font, audio, map, sprite, or traced derivative is inclu
 generated from Phaser rectangle graphics. Renderer evidence:
 
 - [WebGL first frame](evidence/phase0/webgl-first-frame.png) — SHA-256
-  `b7aab37a47eb5ed6192514548b312738c963bc37c7fb1c68eb3537b4bc15e758`
+  `eb2199c9ad1fe82537a59ce67450c25d945b342ade2b0c48295a5a427f2ebbc6`
 - [Canvas first frame](evidence/phase0/canvas-first-frame.png) — SHA-256
-  `3ff346f11c7322919ac3c9bd882d9f05e5432799427768793cf0a6f1ef585697`
+  `3d3581f509373b136f2539f41b80c16a69a22841b5ece929a049129177ab736f`
 
 ## 10. Next-Phase Readiness
 

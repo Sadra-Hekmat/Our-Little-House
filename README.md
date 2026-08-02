@@ -43,4 +43,4 @@ validator intentionally fails until final content replaces every `{{PLACEHOLDER}
 - `docs/plan.md` — hardened production plan
 - `docs/architecture_decisions.md` — Phase 0 decisions and import boundaries
 - `docs/development_report.md` — commands, evidence, risks, and Phase 1 readiness
-# Our-Little-House
+- `CLAUDE.md` — authoritative project map, route registry, and standing checks

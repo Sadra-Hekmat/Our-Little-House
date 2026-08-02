@@ -126,10 +126,10 @@ These features can be considered after the core room experience is approved.
 
 ### 5.1 Routes
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Minimal title/start screen with game title, subtitle, and Play button |
-| `/game` | Full game experience |
+| Route   | Purpose                                                               |
+| ------- | --------------------------------------------------------------------- |
+| `/`     | Minimal title/start screen with game title, subtitle, and Play button |
+| `/game` | Full game experience                                                  |
 
 If desired during implementation, `/` may load the game shell and transition into gameplay without a full page navigation.
 
@@ -194,15 +194,15 @@ The room should include these visual zones:
 
 ### 7.2 Required room elements
 
-| Zone | Required elements |
-| --- | --- |
-| Living area | Television, TV stand, couch, side table, long teal/orange rug, small decorative objects |
-| Kitchen | Upper and lower cabinets, refrigerator, water dispenser, stove, sink, dishes, microwave, countertop |
-| Sleeping area | Bed, pillows, blanket, bedside surface, red/orange rug |
-| Work area | Desk, laptop or desktop computer, monitor, keyboard, office chair |
-| Exercise area | Two dumbbells or small weight set |
-| Pet area | Cat sprite and a nearby open walking area |
-| Environment | Warm wooden floor, deep-purple outer/background area, walls, trim, framed wall decoration |
+| Zone          | Required elements                                                                                   |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| Living area   | Television, TV stand, couch, side table, long teal/orange rug, small decorative objects             |
+| Kitchen       | Upper and lower cabinets, refrigerator, water dispenser, stove, sink, dishes, microwave, countertop |
+| Sleeping area | Bed, pillows, blanket, bedside surface, red/orange rug                                              |
+| Work area     | Desk, laptop or desktop computer, monitor, keyboard, office chair                                   |
+| Exercise area | Two dumbbells or small weight set                                                                   |
+| Pet area      | Cat sprite and a nearby open walking area                                                           |
+| Environment   | Warm wooden floor, deep-purple outer/background area, walls, trim, framed wall decoration           |
 
 Small decorative objects should make the apartment feel lived-in, but they must not make the walking paths unclear.
 
@@ -285,16 +285,16 @@ Recommended animation timing:
 
 ### 9.1 Desktop controls
 
-| Action | Primary input | Alternative input |
-| --- | --- | --- |
-| Move up | `W` | Up Arrow |
-| Move down | `S` | Down Arrow |
-| Move left | `A` | Left Arrow |
-| Move right | `D` | Right Arrow |
-| Confirm / interact | `E` | Enter or Space |
-| Close dialogue | Escape | Enter, Space, or Close button |
-| Mute / unmute | `M` | UI button |
-| Pause / menu | Escape when no dialogue is open | UI button |
+| Action             | Primary input                   | Alternative input             |
+| ------------------ | ------------------------------- | ----------------------------- |
+| Move up            | `W`                             | Up Arrow                      |
+| Move down          | `S`                             | Down Arrow                    |
+| Move left          | `A`                             | Left Arrow                    |
+| Move right         | `D`                             | Right Arrow                   |
+| Confirm / interact | `E`                             | Enter or Space                |
+| Close dialogue     | Escape                          | Enter, Space, or Close button |
+| Mute / unmute      | `M`                             | UI button                     |
+| Pause / menu       | Escape when no dialogue is open | UI button                     |
 
 ### 9.2 Movement behavior
 
@@ -373,20 +373,20 @@ Each interactive item must support:
 
 ### 10.4 Required interactive objects
 
-| ID | Object | Initial dialogue content |
-| --- | --- | --- |
-| `work_computer` | Laptop/computer | `{{LAPTOP_SENTENCE}}` |
-| `bed` | Bed | `{{BED_SENTENCE}}` |
-| `television` | Television | `{{TV_SENTENCE}}` |
-| `couch` | Couch | `{{COUCH_SENTENCE}}` |
-| `refrigerator` | Refrigerator | `{{FRIDGE_SENTENCE}}` |
-| `water_dispenser` | Water dispenser | `{{WATER_SENTENCE}}` |
-| `stove` | Stove | `{{STOVE_SENTENCE}}` |
-| `sink` | Kitchen sink | `{{SINK_SENTENCE}}` |
-| `microwave` | Microwave | `{{MICROWAVE_SENTENCE}}` |
-| `weights` | Dumbbells | `{{WEIGHTS_SENTENCE}}` |
-| `pet_cat` | Cat | `{{CAT_SENTENCE}}` |
-| `wall_art` | Framed wall item | `{{WALL_ART_SENTENCE}}` |
+| ID                | Object           | Initial dialogue content |
+| ----------------- | ---------------- | ------------------------ |
+| `work_computer`   | Laptop/computer  | `{{LAPTOP_SENTENCE}}`    |
+| `bed`             | Bed              | `{{BED_SENTENCE}}`       |
+| `television`      | Television       | `{{TV_SENTENCE}}`        |
+| `couch`           | Couch            | `{{COUCH_SENTENCE}}`     |
+| `refrigerator`    | Refrigerator     | `{{FRIDGE_SENTENCE}}`    |
+| `water_dispenser` | Water dispenser  | `{{WATER_SENTENCE}}`     |
+| `stove`           | Stove            | `{{STOVE_SENTENCE}}`     |
+| `sink`            | Kitchen sink     | `{{SINK_SENTENCE}}`      |
+| `microwave`       | Microwave        | `{{MICROWAVE_SENTENCE}}` |
+| `weights`         | Dumbbells        | `{{WEIGHTS_SENTENCE}}`   |
+| `pet_cat`         | Cat              | `{{CAT_SENTENCE}}`       |
+| `wall_art`        | Framed wall item | `{{WALL_ART_SENTENCE}}`  |
 
 Additional decorative objects may be made interactive through configuration.
 
@@ -485,13 +485,13 @@ The dialogue panel must closely match the supplied reference:
 
 ### 13.3 Recommended palette families
 
-| Role | Color family |
-| --- | --- |
-| Floor and cabinets | Warm amber, orange, terracotta, medium brown |
-| Rugs and bedding | Teal, cyan-blue, orange trim |
-| Background and shadows | Deep purple, navy, muted plum |
-| UI panel | Near-black navy with pale gray/white borders |
-| Highlights | Cream, pale blue, warm yellow |
+| Role                   | Color family                                 |
+| ---------------------- | -------------------------------------------- |
+| Floor and cabinets     | Warm amber, orange, terracotta, medium brown |
+| Rugs and bedding       | Teal, cyan-blue, orange trim                 |
+| Background and shadows | Deep purple, navy, muted plum                |
+| UI panel               | Near-black navy with pale gray/white borders |
+| Highlights             | Cream, pale blue, warm yellow                |
 
 Final colors must be defined in the approved art palette before asset production.
 
