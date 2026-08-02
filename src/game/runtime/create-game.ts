@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
 
-import type { RendererName } from '@contracts/game-events';
+import type { GamePauseReason, RendererName } from '@contracts/game-events';
 import { BootScene } from '@game/scenes/boot-scene';
 import { HomeScene } from '@game/scenes/home-scene';
 import { PreloadScene } from '@game/scenes/preload-scene';
 import { TitleScene } from '@game/scenes/title-scene';
 import { StateController } from '@game/state/state-controller';
+import { loadMapFromManifest } from '@map/map-manifest';
 
 type RendererRequest = 'auto' | 'webgl' | 'canvas';
 
@@ -20,6 +21,11 @@ const shouldInjectFailure = (): boolean => {
   return new URLSearchParams(window.location.search).get('failRenderer') === '1';
 };
 
+const shouldDebugCollisions = (): boolean => {
+  if (!import.meta.env.DEV) return false;
+  return new URLSearchParams(window.location.search).get('debugCollision') === '1';
+};
+
 const phaserRenderer = (request: RendererRequest): number => {
   if (request === 'webgl') return Phaser.WEBGL;
   if (request === 'canvas') return Phaser.CANVAS;
@@ -28,12 +34,16 @@ const phaserRenderer = (request: RendererRequest): number => {
 
 export const createGame = (
   parent: HTMLDivElement,
-  onFirstFrame: (renderer: RendererName) => void,
+  callbacks: {
+    onFirstFrame: (renderer: RendererName) => void;
+    onPauseChange: (paused: boolean, reason: GamePauseReason) => void;
+  },
 ): Phaser.Game => {
   if (shouldInjectFailure()) {
     throw new Error('Injected renderer construction failure.');
   }
 
+  const map = loadMapFromManifest('graybox-home');
   const stateController = new StateController();
   const game = new Phaser.Game({
     type: phaserRenderer(readRendererRequest()),
@@ -46,6 +56,13 @@ export const createGame = (
     antialias: false,
     antialiasGL: false,
     transparent: false,
+    physics: {
+      default: 'arcade',
+      arcade: {
+        gravity: { x: 0, y: 0 },
+        debug: shouldDebugCollisions(),
+      },
+    },
     render: {
       antialias: false,
       antialiasGL: false,
@@ -62,7 +79,7 @@ export const createGame = (
       new BootScene(stateController),
       new PreloadScene(stateController),
       new TitleScene(stateController),
-      new HomeScene(stateController, onFirstFrame),
+      new HomeScene(stateController, map, callbacks, shouldDebugCollisions()),
     ],
     callbacks: {
       postBoot: (bootedGame) => {

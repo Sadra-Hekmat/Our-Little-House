@@ -25,6 +25,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "evidence:phase0": "playwright test tests/e2e/phase0-evidence.spec.ts",
+    "evidence:phase1": "UPDATE_PHASE1_EVIDENCE=1 playwright test tests/e2e/phase1-graybox.spec.ts --grep 'produces the same|meets desktop'",
     "verify": "npm run format:check && npm run check:registry && npm run lint && npm run typecheck && npm test && npm run validate:content && npm run build && npm run test:bundle && npm run test:preview && npm run audit:critical"
   },
   "dependencies": {

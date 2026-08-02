@@ -218,36 +218,40 @@ The version 1 attack surface is small because the product is a static, anonymous
 
 **Tasks:**
 
-- [ ] (S) Create a `tests/fixtures/graybox-home.json` Tiled-compatible map at `640 × 360` with floor, walls, required furniture footprints, spawn, interaction placeholders, and depth anchors for the seven visual zones defined in the requirements.
-- [ ] (M) Implement a typed Tiled map adapter that validates map dimensions, layer names, object IDs, rectangles, spawn count, collision metadata, and depth anchors before constructing Phaser objects.
-- [ ] (M) Implement the placeholder player with four facing directions, idle/walk animation contracts, normalized movement, last-facing retention, integral positioning, and a single Arcade Physics body.
-- [ ] (M) Implement unified keyboard input for WASD, arrows, E, Enter, Space, Escape, and M; prevent browser scrolling only while the game has active input focus and expose typed action states to game systems.
-- [ ] (M) Generate static collision bodies from map object layers and add collision-debug rendering available only in development; add an automated path test for every corridor and required object clearance.
-- [ ] (M) Implement depth resolution using explicit layer bands plus entity y-position; add a fixture with a tall object whose art bounds differ from its collision bounds.
-- [ ] (S) Add pause/resume, Return to Start, and Restart actions with one state owner for movement; ensure blur and document visibility pause the game safely.
-- [ ] (M) Add Vitest coverage for movement vectors, diagonal normalization, map validation, and depth calculation plus Playwright coverage for spawn, collision, pause, and both renderers.
-- [ ] [WARGAME] (S) Add map-parser resource limits and tests for excessive layer/object/point counts, duplicate IDs, external tileset URLs, non-finite coordinates, and geometry outside `640 × 360`; fail before Phaser object construction.
-- [ ] [WARGAME] (S) Freeze a versioned gray-box contract containing map dimensions, required layer names, animation keys, coordinate origin, depth bands, and interaction IDs; make later map/atlas validation depend on this contract.
-- [ ] [WARGAME] (M) Add a reachability test that samples the collision grid from spawn to every required interaction approach point, enforces the configured clearance, and fails on disconnected walkable islands or trap pockets.
-- [ ] [WARGAME] (M) Add input-lifecycle tests for simultaneous keys, key repeat, opposite directions, window blur, visibility change, pointer focus loss, Pause/Restart, and route exit; assert no action remains stuck and browser scrolling resumes outside active play.
-- [ ] [WARGAME] (M) Record deterministic movement traces and frame-time baselines for forced WebGL and Canvas on one named representative desktop and mid-range mobile profile; require final coordinates within one logical pixel and Canvas at or above 30 FPS before Phase 2.
+- [x] (S) Create a `tests/fixtures/graybox-home.json` Tiled-compatible map at `640 × 360` with floor, walls, required furniture footprints, spawn, interaction placeholders, and depth anchors for the seven visual zones defined in the requirements.
+- [x] (M) Implement a typed Tiled map adapter that validates map dimensions, layer names, object IDs, rectangles, spawn count, collision metadata, and depth anchors before constructing Phaser objects.
+- [x] (M) Implement the placeholder player with four facing directions, idle/walk animation contracts, normalized movement, last-facing retention, integral positioning, and a single Arcade Physics body.
+- [x] (M) Implement unified keyboard input for WASD, arrows, E, Enter, Space, Escape, and M; prevent browser scrolling only while the game has active input focus and expose typed action states to game systems.
+- [x] (M) Generate static collision bodies from map object layers and add collision-debug rendering available only in development; add an automated path test for every corridor and required object clearance.
+- [x] (M) Implement depth resolution using explicit layer bands plus entity y-position; add a fixture with a tall object whose art bounds differ from its collision bounds.
+- [x] (S) Add pause/resume, Return to Start, and Restart actions with one state owner for movement; ensure blur and document visibility pause the game safely.
+- [x] (M) Add Vitest coverage for movement vectors, diagonal normalization, map validation, and depth calculation plus Playwright coverage for spawn, collision, pause, and both renderers.
+- [x] [WARGAME] (S) Add map-parser resource limits and tests for excessive layer/object/point counts, duplicate IDs, external tileset URLs, non-finite coordinates, and geometry outside `640 × 360`; fail before Phaser object construction.
+- [x] [WARGAME] (S) Freeze a versioned gray-box contract containing map dimensions, required layer names, animation keys, coordinate origin, depth bands, and interaction IDs; make later map/atlas validation depend on this contract.
+- [x] [WARGAME] (M) Add a reachability test that samples the collision grid from spawn to every required interaction approach point, enforces the configured clearance, and fails on disconnected walkable islands or trap pockets.
+- [x] [WARGAME] (M) Add input-lifecycle tests for simultaneous keys, key repeat, opposite directions, window blur, visibility change, pointer focus loss, Pause/Restart, and route exit; assert no action remains stuck and browser scrolling resumes outside active play.
+- [x] [WARGAME] (M) Record deterministic movement traces and frame-time baselines for forced WebGL and Canvas on one named representative desktop and mid-range mobile profile; require final coordinates within one logical pixel and Canvas at or above 30 FPS before Phase 2.
 
 **Scalability notes:** Map data owns layout while reusable systems own behavior, allowing a future room to be added without copying scene logic. Collision and depth metadata remain independent so increasingly detailed art does not destabilize movement.  
 ⚠️ DEBT: The player uses placeholder geometry instead of a final sprite sheet. This isolates mechanics from art; Phase 3 binds the same animation contract to approved sprites and deletes the placeholder in the release build.
 
 **Security checklist:**
 
-- [ ] Reject malformed, non-finite, negative, or out-of-bounds Tiled geometry before it reaches Phaser (OWASP A03/A04).
-- [ ] Exclude collision debug overlays, raw map dumps, and stack traces from production (OWASP A05).
-- [ ] Keep map and asset URLs same-origin and produced from an allowlisted manifest rather than arbitrary query parameters (OWASP A03).
+- [x] Reject malformed, non-finite, negative, or out-of-bounds Tiled geometry before it reaches Phaser (OWASP A03/A04).
+- [x] Exclude collision debug overlays, raw map dumps, and stack traces from production (OWASP A05).
+- [x] Keep map and asset URLs same-origin and produced from an allowlisted manifest rather than arbitrary query parameters (OWASP A03).
 
 **Definition of Done:**
 
-- [ ] All tasks checked.
-- [ ] Test plan passes.
-- [ ] Every required area has a reachable gray-box path and no trap.
+- [x] All tasks checked.
+- [x] Test plan passes locally.
+- [x] Every required area has a reachable gray-box path and no trap.
 - [ ] The renderer gate passes at target performance before final art begins.
-- [ ] `docs/development_report.md` updated for this phase.
+- [x] `docs/development_report.md` updated for this phase.
+
+Physical-device note: local WebGL and 4× CPU-throttled Canvas profiles pass, but the renderer gate
+remains open until the same Canvas fixture sustains at least 30 FPS on one named representative
+mid-range mobile device.
 
 ## Risk Audit
 

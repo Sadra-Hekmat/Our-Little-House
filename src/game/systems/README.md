@@ -1,4 +1,5 @@
 # Game systems boundary
 
-Movement, collision, interaction selection, depth, pet behavior, and audio systems will be added
-here in later phases. Systems do not own website routing or DOM overlays.
+Phase 1 owns normalized movement, deterministic traces, unified input state, and browser input
+lifecycle handling here. Systems do not own website routing or DOM overlays. Interaction selection,
+pet behavior, and audio arrive in later phases behind the same typed boundary.

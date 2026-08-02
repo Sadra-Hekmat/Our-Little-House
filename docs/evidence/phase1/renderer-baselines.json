@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-02T21:50:36.206Z",
+  "thresholds": {
+    "desktopFps": 55,
+    "mobileCanvasFps": 30,
+    "rendererCoordinateTolerance": 1
+  },
+  "trace": [
+    {
+      "directions": {
+        "up": false,
+        "down": false,
+        "left": false,
+        "right": true
+      },
+      "frames": 120
+    },
+    {
+      "directions": {
+        "up": false,
+        "down": true,
+        "left": false,
+        "right": false
+      },
+      "frames": 60
+    },
+    {
+      "directions": {
+        "up": false,
+        "down": false,
+        "left": true,
+        "right": false
+      },
+      "frames": 60
+    },
+    {
+      "directions": {
+        "up": false,
+        "down": true,
+        "left": false,
+        "right": false
+      },
+      "frames": 30
+    }
+  ],
+  "profiles": [
+    {
+      "name": "Desktop Chromium 1366×768",
+      "renderer": "WebGL",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "cpuThrottle": 1,
+      "averageFps": 60,
+      "finalTrace": {
+        "x": 370,
+        "y": 307,
+        "facing": "down",
+        "frames": 270
+      }
+    },
+    {
+      "name": "Mobile landscape Chromium 844×390, 4× CPU throttle",
+      "renderer": "Canvas",
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "cpuThrottle": 4,
+      "averageFps": 60.1,
+      "finalTrace": {
+        "x": 370,
+        "y": 307,
+        "facing": "down",
+        "frames": 270
+      }
+    }
+  ]
+}

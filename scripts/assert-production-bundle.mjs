@@ -2,7 +2,14 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const dist = path.resolve('dist');
-const forbiddenTokens = ['failRenderer', '__OLH_DEV__', 'Renderer: WebGL', 'Renderer: Canvas'];
+const forbiddenTokens = [
+  'failRenderer',
+  'debugCollision',
+  '__OLH_DEV__',
+  '__OLH_PHASE1__',
+  'Renderer: WebGL',
+  'Renderer: Canvas',
+];
 
 const files = [];
 const visit = async (directory) => {

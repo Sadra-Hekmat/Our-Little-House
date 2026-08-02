@@ -2,9 +2,9 @@
 
 ## Report Metadata
 
-- **Phase:** 0 — Repository Foundation and Renderer Spike
-- **Status:** Complete
-- **Completed:** 2026-08-02
+- **Phase:** 0–1 — latest: Playable Gray-Box Core
+- **Status:** Phase 1 locally complete; physical-device renderer acceptance pending
+- **Latest local completion:** 2026-08-02
 - **Executor:** Codex
 - **Source requirements:** `requirement.md`
 - **Source plan:** `docs/plan.md`
@@ -136,18 +136,75 @@ hygiene correction. It contained no `node_modules`, `dist`, browser reports, or 
 No Phase 1 blocker remains. Final subtitle, character/cat references, room layout, launch dialogue,
 language choice, interaction mode, and audio choice remain product inputs for later phases.
 
-## 9. Assets and Content Status
+## 9. Phase 0 Assets and Content Status
 
-No reference-site image, font, audio, map, sprite, or traced derivative is included. The room is
-generated from Phaser rectangle graphics. Renderer evidence:
+No reference-site image, font, audio, sprite, or traced derivative is included. Phase 0 began with
+generated rectangle graphics; its renderer screenshots are refreshed by the regression suite and
+now show the Phase 1 gray-box while preserving the same first-visible-frame gate:
 
 - [WebGL first frame](evidence/phase0/webgl-first-frame.png) — SHA-256
-  `eb2199c9ad1fe82537a59ce67450c25d945b342ade2b0c48295a5a427f2ebbc6`
+  `f53887bf5b3e714dee8782af4ae7113cf0976fff2f10e0d5087bde9554a533f2`
 - [Canvas first frame](evidence/phase0/canvas-first-frame.png) — SHA-256
-  `3d3581f509373b136f2539f41b80c16a69a22841b5ece929a049129177ab736f`
+  `dd0313ac3078e13bf7d37108177dfa83c69c48cb26f8b749db4c54ccf5bba08b`
 
-## 10. Next-Phase Readiness
+## 10. Phase 0 Closeout
 
-The renderer, direct-route, lifecycle, production-debug, audit, and clean-install gates pass. Phase
-1 may begin with the deterministic gray-box map, movement, collision, depth, and input ownership
-tasks. Final art production remains blocked until the content gate inputs are approved.
+The renderer, direct-route, lifecycle, production-debug, audit, and clean-install gates remain
+green after Phase 1 integration.
+
+## 11. Phase 1 Goal and Result
+
+Phase 1 proves a complete gray-box mechanics layer before final art. The result is one fixed-camera,
+seven-zone room with all required furniture footprints and twelve stable interaction approaches. A
+placeholder player spawns centrally, moves through WASD or arrow input, collides with walls and
+furniture, retains four-direction facing, changes depth around tall furniture, pauses safely, and
+restarts without creating a second runtime.
+
+## 12. Phase 1 Work Completed
+
+- Added a versioned gray-box contract for logical dimensions, tile size, layer names, seven zone
+  IDs, twelve interaction IDs, eight animation keys, depth bands, player clearance, and parser
+  resource limits.
+- Added the Tiled-compatible `tests/fixtures/graybox-home.json` fixture with floor, room walls,
+  furniture, spawn, interaction rectangles/approaches, and visual depth bounds separated from
+  collision footprints.
+- Added a bounded adapter that rejects invalid dimensions/layers, duplicate IDs, non-finite or
+  out-of-bounds rectangles, excessive resources, polygons, external tilesets, invalid spawn data,
+  broken depth references, and missing stable IDs before Phaser construction.
+- Added full-grid reachability sampling from spawn to all twelve approaches with player clearance;
+  every walkable cell belongs to the spawn component and no trap pocket remains.
+- Added a single Arcade Physics player body, static collision bodies, original generated four-way
+  placeholder animation frames, normalized motion, last-facing idle behavior, and y-anchor depth.
+- Added focus-scoped keyboard input and accessible DOM pause controls. Blur, hidden-document,
+  pointer/focus loss, pause, restart, and route exit clear all held actions.
+- Added deterministic renderer traces, desktop WebGL and throttled mobile-landscape Canvas profiles,
+  screenshots, FPS thresholds, and production-bundle checks for every Phase 1 debug hook.
+
+## 13. Phase 1 Verification
+
+| Gate                 | Result                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------- |
+| Unit tests           | 20 tests pass across state, movement, input, depth, trace, map attacks, and reachability |
+| Browser tests        | 19 tests pass across Phase 0 regression and Phase 1 gameplay suites                      |
+| Reachability         | 12/12 approaches reachable; 0 disconnected walkable trap cells                           |
+| Cross-renderer trace | WebGL and Canvas both end at `(370, 307)`, facing down, after 270 frames                 |
+| Desktop profile      | WebGL at `1366 × 768`: 60.0 average FPS                                                  |
+| Mobile profile       | Canvas at `844 × 390`, 4× CPU throttle: 60.1 average FPS                                 |
+| Production build     | Approximately 1.23 MB uncompressed; 329.36 kB main-JS gzip                               |
+| Dependency audit     | 0 vulnerabilities at critical audit level                                                |
+
+Evidence is stored under `docs/evidence/phase1/`. The development API, collision query override,
+raw diagnostics, and failure hooks are absent from the production bundle.
+
+- Desktop WebGL screenshot SHA-256:
+  `8e494000608b5a3afdbafb87cc4e3401f2c92b7fee801b24ecfde6086ee7fa2a`
+- Mobile Canvas screenshot SHA-256:
+  `2dbd24e20a09ab9068ae7a7dfb4218cdb35beb5d0bf1df4f723fd82556583b0e`
+
+## 14. Phase 1 Known Boundary
+
+The reproducible local desktop and throttled mobile profiles pass, but they do not prove physical
+device behavior. Before Phase 2 closes—or final art begins—the Canvas baseline must be rerun on one
+named representative mid-range mobile device and sustain at least 30 FPS. Final room layout,
+subtitle, character/cat references, dialogue, language, interaction mode, and audio remain later
+content approvals; they do not invalidate the gray-box contract.

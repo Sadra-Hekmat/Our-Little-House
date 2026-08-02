@@ -20,7 +20,8 @@ website, targeting current desktop and mobile browsers.
 - build: `npm run build`
 - unit tests: `npm test`
 - browser tests: `npm run test:e2e`
-- full Phase 0 local gate: `npm run verify && npm run test:e2e`
+- renderer/performance evidence: `npm run evidence:phase1`
+- full local gate: `npm run verify && npm run test:e2e`
 - ship: push a reviewed commit after CI passes; production deployment is configured in a later
   release phase
 
@@ -59,6 +60,8 @@ website, targeting current desktop and mobile browsers.
   part of the current task.
 - Keep DOM routing/focus/recovery out of Phaser scenes and keep game rules out of the browser shell.
 - Preserve the development-only boundary around renderer overrides, diagnostics, and failure hooks.
+- Changes to the fixture-map dimensions, layers, interaction IDs, animation keys, or depth bands
+  require a versioned update to `src/map/graybox-contract.ts` and its adversarial tests.
 
 ## Before saying done
 
