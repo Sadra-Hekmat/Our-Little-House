@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "REPLACE_WITH_ISO_TIMESTAMP",
+  "environment": {
+    "type": "physical-device",
+    "deviceModel": "REPLACE_WITH_DEVICE_MODEL",
+    "operatingSystem": "REPLACE_WITH_OS_AND_VERSION",
+    "browser": "REPLACE_WITH_BROWSER_AND_VERSION"
+  },
+  "renderer": "Canvas",
+  "orientation": "landscape",
+  "viewport": {
+    "width": 0,
+    "height": 0
+  },
+  "performance": {
+    "averageFps": 0,
+    "p95FrameMs": 0,
+    "sampleFrames": 0,
+    "sampleDurationMs": 0
+  },
+  "finalTrace": {
+    "x": 0,
+    "y": 0,
+    "facing": "down",
+    "frames": 270
+  },
+  "screenshot": {
+    "path": "physical-mobile-canvas.png",
+    "sha256": "REPLACE_WITH_SHA256"
+  }
+}

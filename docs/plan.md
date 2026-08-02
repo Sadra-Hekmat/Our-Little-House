@@ -251,7 +251,7 @@ The version 1 attack surface is small because the product is a static, anonymous
 
 Physical-device note: local WebGL and 4× CPU-throttled Canvas profiles pass, but the renderer gate
 remains open until the same Canvas fixture sustains at least 30 FPS on one named representative
-mid-range mobile device.
+mid-range mobile device and the captured evidence passes `npm run check:phase1:physical`.
 
 ## Risk Audit
 

@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { resolveMovement } from '@game/systems/movement';
-import { runMovementTrace } from '@game/systems/movement-trace';
+import {
+  bodyBoundsForPosition,
+  PHASE1_ACCEPTANCE_TRACE,
+  runMovementTrace,
+} from '@game/systems/movement-trace';
 import { depthForAnchor, depthForBand, depthForEntity, isEntityBehindAnchor } from '@map/depth';
 import { GRAYBOX_CONTRACT } from '@map/graybox-contract';
 import { validateGrayboxMap } from '@map/tiled-map-adapter';
@@ -11,6 +15,21 @@ import grayboxHome from '../fixtures/graybox-home.json';
 const still = { up: false, down: false, left: false, right: false };
 
 describe('movement vectors and animation contract', () => {
+  it('keeps the Phaser body centered on the contract position', () => {
+    const player = GRAYBOX_CONTRACT.player;
+    expect(player.frameWidth * player.originX - player.bodyOffsetX).toBe(player.bodyWidth / 2);
+    expect(player.frameHeight * player.originY - player.bodyOffsetY).toBe(player.bodyHeight / 2);
+    expect(player.frameHeight * (1 - player.originY)).toBe(player.feetOffsetY);
+    expect(bodyBoundsForPosition(320, 184)).toEqual({
+      left: 314,
+      right: 326,
+      top: 179,
+      bottom: 189,
+      centerX: 320,
+      centerY: 184,
+    });
+  });
+
   it('maps every cardinal direction to full speed and the matching walk contract', () => {
     const cases = [
       [{ ...still, up: true }, 'up', 0, -96],
@@ -63,12 +82,7 @@ describe('depth bands and anchors', () => {
 
 describe('deterministic movement trace', () => {
   it('resolves the same fixed-step collision path to an exact final coordinate', () => {
-    const result = runMovementTrace(validateGrayboxMap(grayboxHome), [
-      { directions: { ...still, right: true }, frames: 120 },
-      { directions: { ...still, down: true }, frames: 60 },
-      { directions: { ...still, left: true }, frames: 60 },
-      { directions: { ...still, down: true }, frames: 30 },
-    ]);
+    const result = runMovementTrace(validateGrayboxMap(grayboxHome), PHASE1_ACCEPTANCE_TRACE);
 
     expect(result).toEqual({ x: 370, y: 307, facing: 'down', frames: 270 });
   });

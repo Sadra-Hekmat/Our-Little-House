@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-08-02T21:50:36.206Z",
+  "capturedAt": "2026-08-02T22:45:16.530Z",
+  "traceSource": "live Phaser Arcade Physics at fixed 60 Hz",
   "thresholds": {
     "desktopFps": 55,
     "mobileCanvasFps": 30,
@@ -53,12 +54,29 @@
         "height": 768
       },
       "cpuThrottle": 1,
-      "averageFps": 60,
+      "averageFps": 57.3,
+      "p95FrameMs": 21.5,
+      "sampleFrames": 127,
+      "sampleDurationMs": 2215.7,
       "finalTrace": {
         "x": 370,
         "y": 307,
         "facing": "down",
         "frames": 270
+      },
+      "finalBody": {
+        "left": 364,
+        "right": 376,
+        "top": 302,
+        "bottom": 312,
+        "centerX": 370,
+        "centerY": 307,
+        "blocked": {
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
       }
     },
     {
@@ -69,12 +87,29 @@
         "height": 390
       },
       "cpuThrottle": 4,
-      "averageFps": 60.1,
+      "averageFps": 60,
+      "p95FrameMs": 18,
+      "sampleFrames": 132,
+      "sampleDurationMs": 2198.7,
       "finalTrace": {
         "x": 370,
         "y": 307,
         "facing": "down",
         "frames": 270
+      },
+      "finalBody": {
+        "left": 364,
+        "right": 376,
+        "top": 302,
+        "bottom": 312,
+        "centerX": 370,
+        "centerY": 307,
+        "blocked": {
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
       }
     }
   ]

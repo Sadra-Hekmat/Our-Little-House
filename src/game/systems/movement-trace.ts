@@ -7,6 +7,15 @@ export interface MovementTraceSegment {
   frames: number;
 }
 
+const still = { up: false, down: false, left: false, right: false } as const;
+
+export const PHASE1_ACCEPTANCE_TRACE: readonly MovementTraceSegment[] = [
+  { directions: { ...still, right: true }, frames: 120 },
+  { directions: { ...still, down: true }, frames: 60 },
+  { directions: { ...still, left: true }, frames: 60 },
+  { directions: { ...still, down: true }, frames: 30 },
+];
+
 export interface MovementTraceResult {
   x: number;
   y: number;
@@ -14,17 +23,37 @@ export interface MovementTraceResult {
   frames: number;
 }
 
-const overlaps = (
-  x: number,
-  y: number,
-  halfWidth: number,
-  halfHeight: number,
-  rectangle: RectangleGeometry,
-): boolean =>
-  x + halfWidth > rectangle.x &&
-  x - halfWidth < rectangle.x + rectangle.width &&
-  y + halfHeight > rectangle.y &&
-  y - halfHeight < rectangle.y + rectangle.height;
+export interface PlayerBodyBounds {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  centerX: number;
+  centerY: number;
+}
+
+export const bodyBoundsForPosition = (x: number, y: number): PlayerBodyBounds => {
+  const halfWidth = GRAYBOX_CONTRACT.player.bodyWidth / 2;
+  const halfHeight = GRAYBOX_CONTRACT.player.bodyHeight / 2;
+  return {
+    left: x - halfWidth,
+    right: x + halfWidth,
+    top: y - halfHeight,
+    bottom: y + halfHeight,
+    centerX: x,
+    centerY: y,
+  };
+};
+
+const overlaps = (x: number, y: number, rectangle: RectangleGeometry): boolean => {
+  const body = bodyBoundsForPosition(x, y);
+  return (
+    body.right > rectangle.x &&
+    body.left < rectangle.x + rectangle.width &&
+    body.bottom > rectangle.y &&
+    body.top < rectangle.y + rectangle.height
+  );
+};
 
 const moveAxis = (
   position: { x: number; y: number },
@@ -38,7 +67,7 @@ const moveAxis = (
   position[axis] += delta;
 
   for (const collision of collisions) {
-    if (!overlaps(position.x, position.y, halfWidth, halfHeight, collision)) continue;
+    if (!overlaps(position.x, position.y, collision)) continue;
     if (axis === 'x') {
       position.x = delta > 0 ? collision.x - halfWidth : collision.x + collision.width + halfWidth;
     } else {

@@ -66,9 +66,11 @@ allowlist; query parameters and external tileset URLs cannot select assets.
 
 **Decision:** Phaser Arcade Physics owns the single player body and static collision bodies. Pure
 functions own movement-vector normalization, depth calculation, reachability sampling, and fixed
-trace calculation so renderer-independent rules have exact unit tests. Runtime keyboard motion
-still uses Arcade velocity/collision, while the deterministic trace is the cross-renderer evidence
-contract used to detect future map or timing drift.
+trace calculation so renderer-independent rules have exact unit tests. The player contract also
+freezes sprite origin, body offsets, and the visual feet offset so the pure and Phaser coordinate
+models cannot diverge. Runtime keyboard motion still uses Arcade velocity/collision. Cross-renderer
+evidence advances that live Phaser body at a fixed 60 Hz and compares it with the pure trace oracle
+to detect future body, map, renderer, or timing drift.
 
 ## ADR-008: Focus-scoped input and DOM-owned pause controls
 

@@ -21,6 +21,7 @@ website, targeting current desktop and mobile browsers.
 - unit tests: `npm test`
 - browser tests: `npm run test:e2e`
 - renderer/performance evidence: `npm run evidence:phase1`
+- physical-device closeout evidence: `npm run check:phase1:physical`
 - full local gate: `npm run verify && npm run test:e2e`
 - ship: push a reviewed commit after CI passes; production deployment is configured in a later
   release phase

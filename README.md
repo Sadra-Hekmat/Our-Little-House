@@ -36,6 +36,10 @@ npm run evidence:phase0
 npm run evidence:phase1
 ```
 
+The final Phase 1 physical-device closeout is intentionally separate from CI. After capturing the
+documented real-phone Canvas evidence, run `npm run check:phase1:physical`; see
+`docs/evidence/phase1/README.md` for the exact procedure.
+
 `npm run validate:content` permits the approved development subtitle placeholder. The production
 validator intentionally fails until final content replaces every `{{PLACEHOLDER}}`.
 

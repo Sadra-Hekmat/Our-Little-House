@@ -2,14 +2,15 @@ import Phaser from 'phaser';
 
 import type { GamePauseReason, RendererName } from '@contracts/game-events';
 import { GAME_COMMAND_EVENT, type GameCommand } from '@contracts/game-events';
-import { createPlaceholderPlayer } from '@game/entities/placeholder-player';
+import { createPlaceholderPlayer, playerFeetY } from '@game/entities/placeholder-player';
 import { KeyboardInputController } from '@game/systems/input-controller';
 import type { InputAction } from '@game/systems/input-state';
 import { resolveMovement } from '@game/systems/movement';
 import {
-  runMovementTrace,
+  PHASE1_ACCEPTANCE_TRACE,
   type MovementTraceResult,
   type MovementTraceSegment,
+  type PlayerBodyBounds,
 } from '@game/systems/movement-trace';
 import type { StateController } from '@game/state/state-controller';
 import { depthForAnchor, depthForBand, depthForEntity, isEntityBehindAnchor } from '@map/depth';
@@ -33,13 +34,47 @@ interface Phase1Snapshot {
   tallCabinetDepth: number;
   behindTallCabinet: boolean;
   averageFps: number;
+  p95FrameMs: number;
+  sampleFrames: number;
+  sampleDurationMs: number;
   collisionCount: number;
+  body: PlayerBodySnapshot;
+}
+
+interface PlayerBodySnapshot extends PlayerBodyBounds {
+  blocked: { up: boolean; down: boolean; left: boolean; right: boolean };
+}
+
+interface RuntimeTraceSample {
+  position: { x: number; y: number };
+  facing: Facing;
+  body: PlayerBodySnapshot;
+}
+
+interface RuntimeTraceResult extends MovementTraceResult {
+  body: PlayerBodySnapshot;
+  segmentEnds: RuntimeTraceSample[];
 }
 
 interface Phase1DevelopmentApi {
   snapshot: () => Phase1Snapshot;
   teleport: (x: number, y: number) => Phase1Snapshot;
-  runTrace: (segments: MovementTraceSegment[]) => MovementTraceResult;
+  collisions: () => GrayboxMap['collisions'];
+  resetPerformanceSample: () => void;
+  captureAcceptanceEvidence: () => {
+    renderer: RendererName;
+    viewport: { width: number; height: number };
+    performance: Pick<
+      Phase1Snapshot,
+      'averageFps' | 'p95FrameMs' | 'sampleFrames' | 'sampleDurationMs'
+    >;
+    traceDefinition: readonly MovementTraceSegment[];
+    trace: RuntimeTraceResult;
+  };
+  runTrace: (
+    segments: MovementTraceSegment[],
+    start?: { x: number; y: number; facing: Facing },
+  ) => RuntimeTraceResult;
 }
 
 declare global {
@@ -77,6 +112,7 @@ export class HomeScene extends Phaser.Scene {
   private readonly colliders: Phaser.Physics.Arcade.Collider[] = [];
   private lastFacing: Facing;
   private readonly frameDeltas: number[] = [];
+  private previousFrameTimestamp: number | null = null;
   private cleanedUp = false;
 
   public constructor(
@@ -91,12 +127,13 @@ export class HomeScene extends Phaser.Scene {
 
   public create(): void {
     this.cleanedUp = false;
+    this.resetPerformanceSample();
     if (!this.stateController.acceptsMovement) this.stateController.transition('Playing');
 
     this.cameras.main.setBackgroundColor('#180f22');
     this.drawGrayboxRoom();
     this.player = createPlaceholderPlayer(this, this.map.spawn);
-    this.player.setDepth(depthForEntity(this.map.spawn.y));
+    this.player.setDepth(depthForEntity(playerFeetY(this.map.spawn.y)));
     this.installCollisionBodies();
     this.installInput();
     this.game.events.on(GAME_COMMAND_EVENT, this.handleCommand);
@@ -107,11 +144,16 @@ export class HomeScene extends Phaser.Scene {
     this.time.delayedCall(34, () => this.callbacks.onFirstFrame(rendererName(this.game)));
   }
 
-  public override update(_time: number, delta: number): void {
-    if (delta > 0 && delta < 1_000) {
-      this.frameDeltas.push(delta);
-      if (this.frameDeltas.length > 120) this.frameDeltas.shift();
+  public override update(): void {
+    const frameTimestamp = performance.now();
+    if (this.previousFrameTimestamp !== null) {
+      const rawFrameDelta = frameTimestamp - this.previousFrameTimestamp;
+      if (rawFrameDelta > 0 && rawFrameDelta < 1_000) {
+        this.frameDeltas.push(rawFrameDelta);
+        if (this.frameDeltas.length > 1_800) this.frameDeltas.shift();
+      }
     }
+    this.previousFrameTimestamp = frameTimestamp;
 
     if (!this.player || !this.inputController) return;
     if (!this.stateController.acceptsMovement) {
@@ -124,7 +166,7 @@ export class HomeScene extends Phaser.Scene {
     this.lastFacing = movement.facing;
     this.player.setVelocity(movement.x, movement.y);
     this.player.play(movement.animation, true);
-    this.player.setDepth(depthForEntity(this.player.y + 5));
+    this.player.setDepth(depthForEntity(playerFeetY(this.player.y)));
   }
 
   private drawGrayboxRoom(): void {
@@ -263,11 +305,7 @@ export class HomeScene extends Phaser.Scene {
     this.inputController?.clear();
     this.physics.resume();
     if (this.stateController.state === 'Paused') this.stateController.transition('Playing');
-    this.lastFacing = this.map.spawn.facing;
-    this.player.setPosition(this.map.spawn.x, this.map.spawn.y);
-    this.player.body?.reset(this.map.spawn.x, this.map.spawn.y);
-    this.player.setVelocity(0, 0);
-    this.player.play(`player.idle.${this.lastFacing}`, true);
+    this.positionPlayer(this.map.spawn);
     this.callbacks.onPauseChange(false, 'manual');
   }
 
@@ -281,12 +319,9 @@ export class HomeScene extends Phaser.Scene {
     if (!this.player) throw new Error('The player is not ready.');
     const tallCabinet = this.map.depthAnchors.find((anchor) => anchor.name === 'cabinet_tall');
     if (!tallCabinet) throw new Error('The tall-cabinet depth fixture is missing.');
-    const feetY = this.player.y + 5;
+    const feetY = playerFeetY(this.player.y);
     const body = this.player.body;
-    const averageDelta =
-      this.frameDeltas.length === 0
-        ? 0
-        : this.frameDeltas.reduce((total, value) => total + value, 0) / this.frameDeltas.length;
+    const performanceSample = this.performanceSample();
 
     return {
       renderer: rendererName(this.game),
@@ -305,9 +340,122 @@ export class HomeScene extends Phaser.Scene {
       playerDepth: depthForEntity(feetY),
       tallCabinetDepth: depthForAnchor(tallCabinet.anchorY),
       behindTallCabinet: isEntityBehindAnchor(feetY, tallCabinet.anchorY),
-      averageFps: averageDelta > 0 ? Number((1_000 / averageDelta).toFixed(1)) : 0,
+      ...performanceSample,
       collisionCount: this.map.collisions.length,
+      body: this.bodySnapshot(),
     };
+  }
+
+  private bodySnapshot(): PlayerBodySnapshot {
+    const body = this.player?.body as Phaser.Physics.Arcade.Body | undefined;
+    if (!body) throw new Error('The player body is not ready.');
+    return {
+      left: Number(body.left.toFixed(3)),
+      right: Number(body.right.toFixed(3)),
+      top: Number(body.top.toFixed(3)),
+      bottom: Number(body.bottom.toFixed(3)),
+      centerX: Number(body.center.x.toFixed(3)),
+      centerY: Number(body.center.y.toFixed(3)),
+      blocked: {
+        up: body.blocked.up,
+        down: body.blocked.down,
+        left: body.blocked.left,
+        right: body.blocked.right,
+      },
+    };
+  }
+
+  private performanceSample(): Pick<
+    Phase1Snapshot,
+    'averageFps' | 'p95FrameMs' | 'sampleFrames' | 'sampleDurationMs'
+  > {
+    if (this.frameDeltas.length === 0) {
+      return { averageFps: 0, p95FrameMs: 0, sampleFrames: 0, sampleDurationMs: 0 };
+    }
+    const duration = this.frameDeltas.reduce((total, value) => total + value, 0);
+    const ordered = [...this.frameDeltas].sort((left, right) => left - right);
+    const p95Index = Math.max(0, Math.ceil(ordered.length * 0.95) - 1);
+    return {
+      averageFps: Number(((this.frameDeltas.length * 1_000) / duration).toFixed(1)),
+      p95FrameMs: Number((ordered[p95Index] ?? 0).toFixed(2)),
+      sampleFrames: this.frameDeltas.length,
+      sampleDurationMs: Number(duration.toFixed(1)),
+    };
+  }
+
+  private resetPerformanceSample(): void {
+    this.frameDeltas.length = 0;
+    this.previousFrameTimestamp = null;
+  }
+
+  private positionPlayer(start: { x: number; y: number; facing: Facing }): void {
+    if (!this.player) throw new Error('The player is not ready.');
+    this.lastFacing = start.facing;
+    const body = this.player.body as Phaser.Physics.Arcade.Body;
+    body.reset(start.x, start.y);
+    body.updateFromGameObject();
+    this.player.setVelocity(0, 0);
+    this.player.play(`player.idle.${this.lastFacing}`, true);
+    this.player.setDepth(depthForEntity(playerFeetY(this.player.y)));
+  }
+
+  private runRuntimeTrace(
+    segments: MovementTraceSegment[],
+    start: { x: number; y: number; facing: Facing } = this.map.spawn,
+  ): RuntimeTraceResult {
+    if (!this.player || !this.stateController.acceptsMovement) {
+      throw new Error('Runtime traces require a ready, playing scene.');
+    }
+    if (!Number.isFinite(start.x) || !Number.isFinite(start.y)) {
+      throw new Error('Runtime trace start coordinates must be finite.');
+    }
+    for (const segment of segments) {
+      if (!Number.isInteger(segment.frames) || segment.frames < 0 || segment.frames > 3_600) {
+        throw new Error('Trace frame counts must be integers between 0 and 3600.');
+      }
+    }
+
+    const world = this.physics.world;
+    const segmentEnds: RuntimeTraceSample[] = [];
+    let frames = 0;
+    this.inputController?.clear();
+    this.physics.disableUpdate();
+
+    try {
+      this.positionPlayer(start);
+      for (const segment of segments) {
+        for (let frame = 0; frame < segment.frames; frame += 1) {
+          const movement = resolveMovement(segment.directions, this.lastFacing);
+          this.lastFacing = movement.facing;
+          this.player.setVelocity(movement.x, movement.y);
+          this.player.play(movement.animation, true);
+          world.singleStep();
+          this.player.setDepth(depthForEntity(playerFeetY(this.player.y)));
+          frames += 1;
+        }
+        segmentEnds.push({
+          position: {
+            x: Number(this.player.x.toFixed(3)),
+            y: Number(this.player.y.toFixed(3)),
+          },
+          facing: this.lastFacing,
+          body: this.bodySnapshot(),
+        });
+      }
+      this.player.setVelocity(0, 0);
+      this.player.play(`player.idle.${this.lastFacing}`, true);
+      return {
+        x: Number(this.player.x.toFixed(3)),
+        y: Number(this.player.y.toFixed(3)),
+        facing: this.lastFacing,
+        frames,
+        body: this.bodySnapshot(),
+        segmentEnds,
+      };
+    } finally {
+      this.player.setVelocity(0, 0);
+      this.physics.enableUpdate();
+    }
   }
 
   private installDevelopmentApi(): void {
@@ -318,14 +466,27 @@ export class HomeScene extends Phaser.Scene {
         if (!this.player || !Number.isFinite(x) || !Number.isFinite(y)) {
           throw new Error('Teleport requires a ready player and finite coordinates.');
         }
-        this.player.setPosition(
-          Phaser.Math.Clamp(x, 0, this.map.width),
-          Phaser.Math.Clamp(y, 0, this.map.height),
-        );
-        this.player.body?.reset(this.player.x, this.player.y);
+        this.positionPlayer({
+          x: Phaser.Math.Clamp(x, 0, this.map.width),
+          y: Phaser.Math.Clamp(y, 0, this.map.height),
+          facing: this.lastFacing,
+        });
         return this.snapshot();
       },
-      runTrace: (segments) => runMovementTrace(this.map, segments),
+      collisions: () => this.map.collisions,
+      resetPerformanceSample: () => this.resetPerformanceSample(),
+      captureAcceptanceEvidence: () => {
+        const performanceSample = this.performanceSample();
+        const trace = this.runRuntimeTrace([...PHASE1_ACCEPTANCE_TRACE]);
+        return {
+          renderer: rendererName(this.game),
+          viewport: { width: window.innerWidth, height: window.innerHeight },
+          performance: performanceSample,
+          traceDefinition: PHASE1_ACCEPTANCE_TRACE,
+          trace,
+        };
+      },
+      runTrace: (segments, start) => this.runRuntimeTrace(segments, start),
     };
   }
 

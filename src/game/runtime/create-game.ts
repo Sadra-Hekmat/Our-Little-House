@@ -56,6 +56,9 @@ export const createGame = (
     antialias: false,
     antialiasGL: false,
     transparent: false,
+    audio: {
+      noAudio: true,
+    },
     physics: {
       default: 'arcade',
       arcade: {

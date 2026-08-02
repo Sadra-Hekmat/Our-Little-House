@@ -133,8 +133,10 @@ hygiene correction. It contained no `node_modules`, `dist`, browser reports, or 
 
 ## 8. Known Issues and Blockers
 
-No Phase 1 blocker remains. Final subtitle, character/cat references, room layout, launch dialogue,
-language choice, interaction mode, and audio choice remain product inputs for later phases.
+One Phase 1 closeout gate remains: a named physical mid-range mobile device must sustain at least 30
+FPS in Canvas and pass `npm run check:phase1:physical`. No local code blocker remains. Final
+subtitle, character/cat references, room layout, launch dialogue, language choice, interaction mode,
+and audio choice remain product inputs for later phases.
 
 ## 9. Phase 0 Assets and Content Status
 
@@ -173,38 +175,48 @@ restarts without creating a second runtime.
   broken depth references, and missing stable IDs before Phaser construction.
 - Added full-grid reachability sampling from spawn to all twelve approaches with player clearance;
   every walkable cell belongs to the spawn component and no trap pocket remains.
-- Added a single Arcade Physics player body, static collision bodies, original generated four-way
-  placeholder animation frames, normalized motion, last-facing idle behavior, and y-anchor depth.
+- Added a single Arcade Physics player body with a contract-frozen center/origin/feet model, static
+  collision bodies, original generated four-way placeholder animation frames, normalized motion,
+  last-facing idle behavior, and y-anchor depth.
 - Added focus-scoped keyboard input and accessible DOM pause controls. Blur, hidden-document,
   pointer/focus loss, pause, restart, and route exit clear all held actions.
-- Added deterministic renderer traces, desktop WebGL and throttled mobile-landscape Canvas profiles,
-  screenshots, FPS thresholds, and production-bundle checks for every Phase 1 debug hook.
+- Disabled Phaser's unused audio manager for the pre-audio phases so hidden-tab and route teardown
+  cannot leave Web Audio resume rejections; later audio work must enable it with its own lifecycle
+  tests.
+- Added deterministic traces that advance the live Phaser body at a fixed 60 Hz and compare against
+  a pure oracle, plus live collision probes for all sixteen solids, desktop WebGL and throttled
+  mobile-landscape Canvas profiles, raw-frame statistics, screenshots, FPS thresholds, and
+  production-bundle checks for every Phase 1 debug hook.
 
 ## 13. Phase 1 Verification
 
-| Gate                 | Result                                                                                   |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| Unit tests           | 20 tests pass across state, movement, input, depth, trace, map attacks, and reachability |
-| Browser tests        | 19 tests pass across Phase 0 regression and Phase 1 gameplay suites                      |
-| Reachability         | 12/12 approaches reachable; 0 disconnected walkable trap cells                           |
-| Cross-renderer trace | WebGL and Canvas both end at `(370, 307)`, facing down, after 270 frames                 |
-| Desktop profile      | WebGL at `1366 × 768`: 60.0 average FPS                                                  |
-| Mobile profile       | Canvas at `844 × 390`, 4× CPU throttle: 60.1 average FPS                                 |
-| Production build     | Approximately 1.23 MB uncompressed; 329.36 kB main-JS gzip                               |
-| Dependency audit     | 0 vulnerabilities at critical audit level                                                |
+| Gate                    | Result                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| Unit tests              | 21 tests pass across state, movement, input, body geometry, depth, trace, map attacks, and reachability |
+| Browser tests           | 20 tests pass across Phase 0 regression and Phase 1 gameplay suites                                     |
+| Runtime collisions      | The live Phaser body contacts and can leave all 16/16 wall and furniture solids                         |
+| Reachability            | 12/12 approaches reachable; 0 disconnected walkable trap cells                                          |
+| Live renderer trace     | WebGL and Canvas both end at `(370, 307)`, facing down, after 270 real Arcade Physics steps             |
+| Desktop profile         | WebGL at `1366 × 768`: 57.3 average FPS; 21.50 ms p95 raw frame time                                    |
+| Emulated mobile profile | Canvas at `844 × 390`, 4× CPU throttle: 60.0 average FPS; 18.00 ms p95 raw frame time                   |
+| Physical mobile profile | Pending a named real-device capture and `npm run check:phase1:physical`                                 |
+| Production build        | Approximately 1.24 MB uncompressed; 330.06 kB main-JS gzip                                              |
+| Dependency audit        | 0 vulnerabilities at critical audit level                                                               |
 
 Evidence is stored under `docs/evidence/phase1/`. The development API, collision query override,
 raw diagnostics, and failure hooks are absent from the production bundle.
 
 - Desktop WebGL screenshot SHA-256:
-  `8e494000608b5a3afdbafb87cc4e3401f2c92b7fee801b24ecfde6086ee7fa2a`
+  `56c482fbbe2d51e11257acb5acdc2ee92b75cd45103d0476eebb9b9a819b4f54`
 - Mobile Canvas screenshot SHA-256:
-  `2dbd24e20a09ab9068ae7a7dfb4218cdb35beb5d0bf1df4f723fd82556583b0e`
+  `74b03ef95034ba38464272233ee2cd49c14ec156b4e332763409f1a117b47a30`
 
 ## 14. Phase 1 Known Boundary
 
 The reproducible local desktop and throttled mobile profiles pass, but they do not prove physical
 device behavior. Before Phase 2 closes—or final art begins—the Canvas baseline must be rerun on one
-named representative mid-range mobile device and sustain at least 30 FPS. Final room layout,
-subtitle, character/cat references, dialogue, language, interaction mode, and audio remain later
-content approvals; they do not invalidate the gray-box contract.
+named representative mid-range mobile device, sustain at least 30 FPS, and pass the physical
+evidence validator. The capture API, evidence template, screenshot integrity check, and exact
+procedure are ready under `docs/evidence/phase1/`. Final room layout, subtitle, character/cat
+references, dialogue, language, interaction mode, and audio remain later content approvals; they do
+not invalidate the gray-box contract.

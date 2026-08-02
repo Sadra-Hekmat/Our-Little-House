@@ -4,6 +4,9 @@ import { GRAYBOX_CONTRACT, type Facing } from '@map/graybox-contract';
 
 const textureKey = (facing: Facing, frame: number): string => `graybox.player.${facing}.${frame}`;
 
+export const playerFeetY = (playerY: number): number =>
+  playerY + GRAYBOX_CONTRACT.player.feetOffsetY;
+
 const drawPlayerFrame = (
   graphics: Phaser.GameObjects.Graphics,
   facing: Facing,
@@ -33,7 +36,11 @@ export const ensurePlaceholderPlayerAnimations = (scene: Phaser.Scene): void => 
       const key = textureKey(facing, frame);
       if (!scene.textures.exists(key)) {
         drawPlayerFrame(graphics, facing, frame);
-        graphics.generateTexture(key, 14, 20);
+        graphics.generateTexture(
+          key,
+          GRAYBOX_CONTRACT.player.frameWidth,
+          GRAYBOX_CONTRACT.player.frameHeight,
+        );
       }
     }
 
@@ -67,8 +74,10 @@ export const createPlaceholderPlayer = (
   ensurePlaceholderPlayerAnimations(scene);
   const player = scene.physics.add.sprite(spawn.x, spawn.y, textureKey(spawn.facing, 0));
   player.setName('graybox-player');
-  player.setOrigin(0.5, 0.75);
-  player.body?.setSize(GRAYBOX_CONTRACT.player.bodyWidth, GRAYBOX_CONTRACT.player.bodyHeight, true);
+  player.setOrigin(GRAYBOX_CONTRACT.player.originX, GRAYBOX_CONTRACT.player.originY);
+  const body = player.body as Phaser.Physics.Arcade.Body;
+  body.setSize(GRAYBOX_CONTRACT.player.bodyWidth, GRAYBOX_CONTRACT.player.bodyHeight, false);
+  body.setOffset(GRAYBOX_CONTRACT.player.bodyOffsetX, GRAYBOX_CONTRACT.player.bodyOffsetY);
   player.play(GRAYBOX_CONTRACT.animationKeys.idle[spawn.facing]);
   return player;
 };
