@@ -1,12 +1,16 @@
 import type Phaser from 'phaser';
 
-import type { RendererName } from '@contracts/game-events';
+import {
+  GAME_COMMAND_EVENT,
+  type GameCommand,
+  type GameErrorViewModel,
+  type GamePauseReason,
+  type RendererName,
+} from '@contracts/game-events';
 import { createGame } from '@game/runtime/create-game';
+import { MapValidationError } from '@map/tiled-map-adapter';
 
-export interface GameFailure {
-  category: 'renderer-construction';
-  userMessage: string;
-}
+export type GameFailure = GameErrorViewModel;
 
 interface DevelopmentLifecycleStats {
   activeGames: number;
@@ -36,6 +40,7 @@ export class GameOwner {
     container: HTMLDivElement,
     onReady: (renderer: RendererName) => void,
     onFailure: (failure: GameFailure) => void,
+    onPauseChange: (paused: boolean, reason: GamePauseReason) => void,
   ): void {
     this.destroy();
     this.container = container;
@@ -47,20 +52,48 @@ export class GameOwner {
     this.inputInstalled = true;
 
     try {
-      this.game = createGame(container, (renderer) => {
-        if (this.generation === mountedGeneration && this.game) onReady(renderer);
+      this.game = createGame(container, {
+        onFirstFrame: (renderer) => {
+          if (this.generation === mountedGeneration && this.game) onReady(renderer);
+        },
+        onPauseChange: (paused, reason) => {
+          if (this.generation === mountedGeneration && this.game) onPauseChange(paused, reason);
+        },
       });
       this.syncDevelopmentStats();
-    } catch {
+    } catch (error) {
       this.removeOwnedListeners();
       this.game = null;
       this.syncDevelopmentStats();
-      onFailure({
-        category: 'renderer-construction',
-        userMessage:
-          'Your browser could not create the game canvas. Retry, or return to the start.',
-      });
+      onFailure(
+        error instanceof MapValidationError
+          ? {
+              category: 'map-validation',
+              userMessage: 'The room data is invalid. Retry, or return to the start.',
+            }
+          : {
+              category: 'renderer-construction',
+              userMessage:
+                'Your browser could not create the game canvas. Retry, or return to the start.',
+            },
+      );
     }
+  }
+
+  public pause(): void {
+    this.sendCommand({ type: 'pause' });
+  }
+
+  public resume(): void {
+    this.sendCommand({ type: 'resume' });
+  }
+
+  public restart(): void {
+    this.sendCommand({ type: 'restart' });
+  }
+
+  public focus(): void {
+    this.container?.focus({ preventScroll: true });
   }
 
   public destroy(): void {
@@ -81,6 +114,10 @@ export class GameOwner {
     }
     this.resizeInstalled = false;
     this.inputInstalled = false;
+  }
+
+  private sendCommand(command: GameCommand): void {
+    this.game?.events.emit(GAME_COMMAND_EVENT, command);
   }
 
   private syncDevelopmentStats(): void {

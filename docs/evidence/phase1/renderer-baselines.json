@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-02T22:45:16.530Z",
+  "traceSource": "live Phaser Arcade Physics at fixed 60 Hz",
+  "thresholds": {
+    "desktopFps": 55,
+    "mobileCanvasFps": 30,
+    "rendererCoordinateTolerance": 1
+  },
+  "trace": [
+    {
+      "directions": {
+        "up": false,
+        "down": false,
+        "left": false,
+        "right": true
+      },
+      "frames": 120
+    },
+    {
+      "directions": {
+        "up": false,
+        "down": true,
+        "left": false,
+        "right": false
+      },
+      "frames": 60
+    },
+    {
+      "directions": {
+        "up": false,
+        "down": false,
+        "left": true,
+        "right": false
+      },
+      "frames": 60
+    },
+    {
+      "directions": {
+        "up": false,
+        "down": true,
+        "left": false,
+        "right": false
+      },
+      "frames": 30
+    }
+  ],
+  "profiles": [
+    {
+      "name": "Desktop Chromium 1366×768",
+      "renderer": "WebGL",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "cpuThrottle": 1,
+      "averageFps": 57.3,
+      "p95FrameMs": 21.5,
+      "sampleFrames": 127,
+      "sampleDurationMs": 2215.7,
+      "finalTrace": {
+        "x": 370,
+        "y": 307,
+        "facing": "down",
+        "frames": 270
+      },
+      "finalBody": {
+        "left": 364,
+        "right": 376,
+        "top": 302,
+        "bottom": 312,
+        "centerX": 370,
+        "centerY": 307,
+        "blocked": {
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      }
+    },
+    {
+      "name": "Mobile landscape Chromium 844×390, 4× CPU throttle",
+      "renderer": "Canvas",
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "cpuThrottle": 4,
+      "averageFps": 60,
+      "p95FrameMs": 18,
+      "sampleFrames": 132,
+      "sampleDurationMs": 2198.7,
+      "finalTrace": {
+        "x": 370,
+        "y": 307,
+        "facing": "down",
+        "frames": 270
+      },
+      "finalBody": {
+        "left": 364,
+        "right": 376,
+        "top": 302,
+        "bottom": 312,
+        "centerX": 370,
+        "centerY": 307,
+        "blocked": {
+          "up": false,
+          "down": false,
+          "left": false,
+          "right": false
+        }
+      }
+    }
+  ]
+}

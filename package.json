@@ -17,12 +17,17 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "test:bundle": "node scripts/assert-production-bundle.mjs",
+    "test:preview": "node scripts/probe-preview.mjs",
+    "check:registry": "node scripts/check-registry.mjs",
+    "audit:critical": "npm audit --audit-level=critical",
     "validate:content": "node scripts/validate-content.mjs --mode=development",
     "validate:content:production": "node scripts/validate-content.mjs --mode=production",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "evidence:phase0": "playwright test tests/e2e/phase0-evidence.spec.ts",
-    "verify": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run validate:content && npm run build && npm run test:bundle"
+    "evidence:phase1": "UPDATE_PHASE1_EVIDENCE=1 playwright test tests/e2e/phase1-graybox.spec.ts --grep 'produces the same|meets desktop'",
+    "check:phase1:physical": "node scripts/validate-phase1-physical-evidence.mjs",
+    "verify": "npm run format:check && npm run check:registry && npm run lint && npm run typecheck && npm test && npm run validate:content && npm run build && npm run test:bundle && npm run test:preview && npm run audit:critical"
   },
   "dependencies": {
     "phaser": "3.90.0"

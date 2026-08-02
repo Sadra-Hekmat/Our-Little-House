@@ -1,0 +1,71 @@
+name: Phase 0 CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify and browser smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Use pinned Node and npm
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Verify toolchain versions
+        run: |
+          test "$(node --version)" = "v24.14.0"
+          test "$(npm --version)" = "11.9.0"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run Phase 0 gate
+        run: npm run verify
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser and renderer tests
+        run: npm run test:e2e
+
+  cache-empty-install:
+    name: Cache-empty clean checkout
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Use pinned Node and npm without package cache
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+
+      - name: Verify toolchain versions before install
+        run: |
+          test "$(node --version)" = "v24.14.0"
+          test "$(npm --version)" = "11.9.0"
+
+      - name: Install from an empty cache
+        run: |
+          mkdir -p "$RUNNER_TEMP/our-little-house-npm-cache"
+          npm ci --cache "$RUNNER_TEMP/our-little-house-npm-cache" --prefer-offline=false
+
+      - name: Reject dependency graph drift
+        run: git diff --exit-code -- package.json package-lock.json
+
+      - name: Re-run deterministic local gate
+        run: npm run verify

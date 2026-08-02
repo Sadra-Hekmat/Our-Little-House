@@ -2,9 +2,9 @@
 
 ## Report Metadata
 
-- **Phase:** 0 — Repository Foundation and Renderer Spike
-- **Status:** Complete
-- **Completed:** 2026-08-01
+- **Phase:** 0–1 — latest: Playable Gray-Box Core
+- **Status:** Phase 1 locally complete; physical-device renderer acceptance pending
+- **Latest local completion:** 2026-08-02
 - **Executor:** Codex
 - **Source requirements:** `requirement.md`
 - **Source plan:** `docs/plan.md`
@@ -33,6 +33,10 @@ actions.
   related tokens do not enter the production bundle.
 - Added development content validation, unit tests, Playwright browser coverage, pixel-based
   first-frame assertions, renderer screenshots, and two GitHub Actions verification jobs.
+- Added the missing repository hygiene files, removed generated dependencies and macOS metadata
+  from version control, and installed an enforced project map and route registry in `CLAUDE.md`.
+- Added production-preview probes for every Phase 0 route and query variant, plus a cache-empty CI
+  job that verifies the pinned Node/npm versions before installing the lockfile.
 
 ## 3. Architecture and Decisions
 
@@ -57,25 +61,27 @@ relative imports across `app`, `game`, `ui`, `content`, `map`, and `storage`.
 | Playwright Test                          | 1.62.1                |
 | ESLint                                   | 10.8.0                |
 | Prettier                                 | 3.9.6                 |
-| Local headless Chromium evidence runtime | 149.0.7827.0          |
+| Local headless Chromium evidence runtime | 151.0.7922.34         |
 
 GitHub CI installs Playwright's Chromium version associated with Playwright Test 1.62.1.
 
 ## 4. Commands and Tests Run
 
-All commands below exited `0`, including a cache-empty copy at `/tmp/tmp.RkeUHGAiMv` containing no
-`node_modules`, `dist`, prior test results, or reference uploads.
+All commands below exited `0`, including a fresh cache-empty clone made after the repository
+hygiene correction. It contained no `node_modules`, `dist`, browser reports, or prior test results.
 
 | Command                            | Result                                                                  |
 | ---------------------------------- | ----------------------------------------------------------------------- |
-| `npm ci --ignore-scripts`          | 148 packages installed from the committed lockfile                      |
+| `npm ci`                           | 148 packages installed from the committed lockfile                      |
 | `npm run format:check`             | All tracked project files formatted                                     |
+| `npm run check:registry`           | `/` and `/game` match the authoritative route registry                  |
 | `npm run lint`                     | Zero errors and zero warnings                                           |
 | `npm run typecheck`                | Strict application and tool configuration passed                        |
 | `npm test`                         | 4 state-controller tests passed                                         |
 | `npm run validate:content`         | 1 locale validated; 1 approved development placeholder reported         |
 | `npm run build`                    | Vite production build completed; total `dist` size approximately 1.2 MB |
 | `npm run test:bundle`              | 3 release assets contain no forbidden diagnostics/failure tokens        |
+| `npm run test:preview`             | 4 direct route/query probes served the production application shell     |
 | `npm audit --audit-level=critical` | 0 vulnerabilities at all reported severities                            |
 | `npm run test:e2e`                 | 12 Chromium tests passed in the working tree and cache-empty copy       |
 
@@ -94,7 +100,8 @@ All commands below exited `0`, including a cache-empty copy at `/tmp/tmp.RkeUHGA
 ## 5. Security and Privacy Review
 
 - A source scan found no credentials, private keys, analytics SDKs, or tracking endpoints.
-- No `.env` file or secret-bearing example is included.
+- Real environment files are ignored; `.env.example` documents that Phase 0 requires no variables
+  and contains no values.
 - Content is inserted with `textContent` or constructed DOM nodes; `innerHTML`, `eval`,
   `new Function`, and `document.write` are lint-blocked.
 - The lockfile is committed, CI runs critical-level dependency audit, and the current audit reports
@@ -126,21 +133,90 @@ All commands below exited `0`, including a cache-empty copy at `/tmp/tmp.RkeUHGA
 
 ## 8. Known Issues and Blockers
 
-No Phase 1 blocker remains. Final subtitle, character/cat references, room layout, launch dialogue,
-language choice, interaction mode, and audio choice remain product inputs for later phases.
+One Phase 1 closeout gate remains: a named physical mid-range mobile device must sustain at least 30
+FPS in Canvas and pass `npm run check:phase1:physical`. No local code blocker remains. Final
+subtitle, character/cat references, room layout, launch dialogue, language choice, interaction mode,
+and audio choice remain product inputs for later phases.
 
-## 9. Assets and Content Status
+## 9. Phase 0 Assets and Content Status
 
-No reference-site image, font, audio, map, sprite, or traced derivative is included. The room is
-generated from Phaser rectangle graphics. Renderer evidence:
+No reference-site image, font, audio, sprite, or traced derivative is included. Phase 0 began with
+generated rectangle graphics; its renderer screenshots are refreshed by the regression suite and
+now show the Phase 1 gray-box while preserving the same first-visible-frame gate:
 
 - [WebGL first frame](evidence/phase0/webgl-first-frame.png) — SHA-256
-  `b7aab37a47eb5ed6192514548b312738c963bc37c7fb1c68eb3537b4bc15e758`
+  `f53887bf5b3e714dee8782af4ae7113cf0976fff2f10e0d5087bde9554a533f2`
 - [Canvas first frame](evidence/phase0/canvas-first-frame.png) — SHA-256
-  `3ff346f11c7322919ac3c9bd882d9f05e5432799427768793cf0a6f1ef585697`
+  `dd0313ac3078e13bf7d37108177dfa83c69c48cb26f8b749db4c54ccf5bba08b`
 
-## 10. Next-Phase Readiness
+## 10. Phase 0 Closeout
 
-The renderer, direct-route, lifecycle, production-debug, audit, and clean-install gates pass. Phase
-1 may begin with the deterministic gray-box map, movement, collision, depth, and input ownership
-tasks. Final art production remains blocked until the content gate inputs are approved.
+The renderer, direct-route, lifecycle, production-debug, audit, and clean-install gates remain
+green after Phase 1 integration.
+
+## 11. Phase 1 Goal and Result
+
+Phase 1 proves a complete gray-box mechanics layer before final art. The result is one fixed-camera,
+seven-zone room with all required furniture footprints and twelve stable interaction approaches. A
+placeholder player spawns centrally, moves through WASD or arrow input, collides with walls and
+furniture, retains four-direction facing, changes depth around tall furniture, pauses safely, and
+restarts without creating a second runtime.
+
+## 12. Phase 1 Work Completed
+
+- Added a versioned gray-box contract for logical dimensions, tile size, layer names, seven zone
+  IDs, twelve interaction IDs, eight animation keys, depth bands, player clearance, and parser
+  resource limits.
+- Added the Tiled-compatible `tests/fixtures/graybox-home.json` fixture with floor, room walls,
+  furniture, spawn, interaction rectangles/approaches, and visual depth bounds separated from
+  collision footprints.
+- Added a bounded adapter that rejects invalid dimensions/layers, duplicate IDs, non-finite or
+  out-of-bounds rectangles, excessive resources, polygons, external tilesets, invalid spawn data,
+  broken depth references, and missing stable IDs before Phaser construction.
+- Added full-grid reachability sampling from spawn to all twelve approaches with player clearance;
+  every walkable cell belongs to the spawn component and no trap pocket remains.
+- Added a single Arcade Physics player body with a contract-frozen center/origin/feet model, static
+  collision bodies, original generated four-way placeholder animation frames, normalized motion,
+  last-facing idle behavior, and y-anchor depth.
+- Added focus-scoped keyboard input and accessible DOM pause controls. Blur, hidden-document,
+  pointer/focus loss, pause, restart, and route exit clear all held actions.
+- Disabled Phaser's unused audio manager for the pre-audio phases so hidden-tab and route teardown
+  cannot leave Web Audio resume rejections; later audio work must enable it with its own lifecycle
+  tests.
+- Added deterministic traces that advance the live Phaser body at a fixed 60 Hz and compare against
+  a pure oracle, plus live collision probes for all sixteen solids, desktop WebGL and throttled
+  mobile-landscape Canvas profiles, raw-frame statistics, screenshots, FPS thresholds, and
+  production-bundle checks for every Phase 1 debug hook.
+
+## 13. Phase 1 Verification
+
+| Gate                    | Result                                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| Unit tests              | 21 tests pass across state, movement, input, body geometry, depth, trace, map attacks, and reachability |
+| Browser tests           | 20 tests pass across Phase 0 regression and Phase 1 gameplay suites                                     |
+| Runtime collisions      | The live Phaser body contacts and can leave all 16/16 wall and furniture solids                         |
+| Reachability            | 12/12 approaches reachable; 0 disconnected walkable trap cells                                          |
+| Live renderer trace     | WebGL and Canvas both end at `(370, 307)`, facing down, after 270 real Arcade Physics steps             |
+| Desktop profile         | WebGL at `1366 × 768`: 57.3 average FPS; 21.50 ms p95 raw frame time                                    |
+| Emulated mobile profile | Canvas at `844 × 390`, 4× CPU throttle: 60.0 average FPS; 18.00 ms p95 raw frame time                   |
+| Physical mobile profile | Pending a named real-device capture and `npm run check:phase1:physical`                                 |
+| Production build        | Approximately 1.24 MB uncompressed; 330.06 kB main-JS gzip                                              |
+| Dependency audit        | 0 vulnerabilities at critical audit level                                                               |
+
+Evidence is stored under `docs/evidence/phase1/`. The development API, collision query override,
+raw diagnostics, and failure hooks are absent from the production bundle.
+
+- Desktop WebGL screenshot SHA-256:
+  `56c482fbbe2d51e11257acb5acdc2ee92b75cd45103d0476eebb9b9a819b4f54`
+- Mobile Canvas screenshot SHA-256:
+  `74b03ef95034ba38464272233ee2cd49c14ec156b4e332763409f1a117b47a30`
+
+## 14. Phase 1 Known Boundary
+
+The reproducible local desktop and throttled mobile profiles pass, but they do not prove physical
+device behavior. Before Phase 2 closes—or final art begins—the Canvas baseline must be rerun on one
+named representative mid-range mobile device, sustain at least 30 FPS, and pass the physical
+evidence validator. The capture API, evidence template, screenshot integrity check, and exact
+procedure are ready under `docs/evidence/phase1/`. Final room layout, subtitle, character/cat
+references, dialogue, language, interaction mode, and audio remain later content approvals; they do
+not invalidate the gray-box contract.

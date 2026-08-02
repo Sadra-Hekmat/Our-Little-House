@@ -1,9 +1,9 @@
 # Our Little House
 
 **Our Little House** is a tender browser journey through a home that survives only in memory.
-Phase 0 provides the repository foundation, accessible start screen, static routes, crisp Phaser
-renderer spike, and recovery UI. The temporary room is intentionally original flat-color art; no
-reference-site assets are included.
+Phase 1 adds a playable seven-zone gray-box with a placeholder player, keyboard movement,
+collision, depth, pause/restart controls, and deterministic WebGL/Canvas traces. The temporary room
+is intentionally original flat-color geometry; no reference-site assets are included.
 
 ## Requirements
 
@@ -22,17 +22,23 @@ Open `http://localhost:5173/`. Development-only renderer probes are available at
 - `/game?renderer=webgl`
 - `/game?renderer=canvas`
 - `/game?failRenderer=1`
+- `/game?debugCollision=1`
 
 These overrides and diagnostics are stripped or ignored by the production build.
 
-## Verify Phase 0
+## Verify Phases 0–1
 
 ```bash
 npm run verify
 npx playwright install chromium
 npm run test:e2e
 npm run evidence:phase0
+npm run evidence:phase1
 ```
+
+The final Phase 1 physical-device closeout is intentionally separate from CI. After capturing the
+documented real-phone Canvas evidence, run `npm run check:phase1:physical`; see
+`docs/evidence/phase1/README.md` for the exact procedure.
 
 `npm run validate:content` permits the approved development subtitle placeholder. The production
 validator intentionally fails until final content replaces every `{{PLACEHOLDER}}`.
@@ -42,5 +48,5 @@ validator intentionally fails until final content replaces every `{{PLACEHOLDER}
 - `requirement.md` — approved product requirements
 - `docs/plan.md` — hardened production plan
 - `docs/architecture_decisions.md` — Phase 0 decisions and import boundaries
-- `docs/development_report.md` — commands, evidence, risks, and Phase 1 readiness
-# Our-Little-House
+- `docs/development_report.md` — commands, evidence, risks, and current phase readiness
+- `CLAUDE.md` — authoritative project map, route registry, and standing checks

@@ -1,4 +1,5 @@
 import content from '@content/locales/en.json';
+import type { GamePauseReason } from '@contracts/game-events';
 import { GameOwner, type GameFailure } from '@game/runtime/game-owner';
 
 import { Router, type AppRoute } from './router';
@@ -53,7 +54,12 @@ export const startShell = (root: HTMLDivElement): (() => void) => {
     const homeButton = createElement('button', { className: 'quiet-button', text: '← Start' });
     homeButton.type = 'button';
     homeButton.addEventListener('click', () => router.navigate('/'));
-    header.append(homeButton, createElement('strong', { text: content.gameTitle }));
+    const pauseButton = createElement('button', { className: 'quiet-button', text: 'Pause' });
+    pauseButton.type = 'button';
+    pauseButton.addEventListener('click', () => gameOwner.pause());
+    const gameControls = createElement('div', { className: 'game-header-actions' });
+    gameControls.append(homeButton, pauseButton);
+    header.append(gameControls, createElement('strong', { text: content.gameTitle }));
 
     const stage = createElement('section', { className: 'game-stage' });
     stage.setAttribute('aria-label', 'Our Little House game');
@@ -71,9 +77,55 @@ export const startShell = (root: HTMLDivElement): (() => void) => {
     error.setAttribute('aria-live', 'assertive');
     error.dataset.testid = 'renderer-error';
 
+    const pausePanel = createElement('section', { className: 'pause-panel' });
+    pausePanel.hidden = true;
+    pausePanel.setAttribute('role', 'dialog');
+    pausePanel.setAttribute('aria-modal', 'true');
+    pausePanel.setAttribute('aria-labelledby', 'pause-title');
+    pausePanel.dataset.testid = 'pause-panel';
+    const pauseTitle = createElement('h2', { text: 'Paused' });
+    pauseTitle.id = 'pause-title';
+    const pauseReason = createElement('p', {
+      text: 'Movement is stopped. Resume when you are ready.',
+    });
+    const pauseActions = createElement('div', { className: 'error-actions' });
+    const resume = createElement('button', { className: 'primary-button', text: 'Resume' });
+    resume.type = 'button';
+    resume.addEventListener('click', () => {
+      gameOwner.resume();
+      gameOwner.focus();
+    });
+    const restart = createElement('button', { className: 'quiet-button', text: 'Restart' });
+    restart.type = 'button';
+    restart.addEventListener('click', () => {
+      gameOwner.restart();
+      gameOwner.focus();
+    });
+    const returnButton = createElement('button', {
+      className: 'quiet-button',
+      text: 'Return to Start',
+    });
+    returnButton.type = 'button';
+    returnButton.addEventListener('click', () => router.navigate('/'));
+    pauseActions.append(resume, restart, returnButton);
+    pausePanel.append(pauseTitle, pauseReason, pauseActions);
+
+    const showPauseChange = (paused: boolean, reason: GamePauseReason): void => {
+      pausePanel.hidden = !paused;
+      pauseButton.disabled = paused;
+      if (paused) {
+        pauseReason.textContent =
+          reason === 'manual'
+            ? 'Movement is stopped. Resume when you are ready.'
+            : 'Movement stopped safely after gameplay lost focus.';
+        resume.focus();
+      }
+    };
+
     const showFailure = (failure: GameFailure): void => {
       container.hidden = true;
       diagnostics.hidden = true;
+      pausePanel.hidden = true;
       error.replaceChildren();
       const title = createElement('h2', { text: 'The room could not open' });
       const message = createElement('p', { text: failure.userMessage });
@@ -88,15 +140,15 @@ export const startShell = (root: HTMLDivElement): (() => void) => {
         }
         container.hidden = false;
         error.hidden = true;
-        gameOwner.mount(container, showReady, showFailure);
+        gameOwner.mount(container, showReady, showFailure, showPauseChange);
       });
-      const returnButton = createElement('button', {
+      const returnToStart = createElement('button', {
         className: 'quiet-button',
         text: 'Return to Start',
       });
-      returnButton.type = 'button';
-      returnButton.addEventListener('click', () => router.navigate('/'));
-      actions.append(retry, returnButton);
+      returnToStart.type = 'button';
+      returnToStart.addEventListener('click', () => router.navigate('/'));
+      actions.append(retry, returnToStart);
       error.append(title, message, actions);
       error.hidden = false;
       retry.focus();
@@ -111,10 +163,10 @@ export const startShell = (root: HTMLDivElement): (() => void) => {
       }
     };
 
-    stage.append(container, diagnostics, error);
+    stage.append(container, diagnostics, error, pausePanel);
     page.append(header, stage);
     root.replaceChildren(page);
-    gameOwner.mount(container, showReady, showFailure);
+    gameOwner.mount(container, showReady, showFailure, showPauseChange);
   };
 
   const render = (route: AppRoute): void => {

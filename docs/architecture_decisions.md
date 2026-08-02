@@ -49,3 +49,35 @@ hard edges. This keeps map, collision, art, and interaction coordinates stable a
 
 ESLint fails on forbidden aliases and cross-boundary relative imports. Later cross-boundary work
 must add a typed contract instead of weakening this rule without an ADR.
+
+## ADR-006: Versioned gray-box map contract before final art
+
+**Status:** accepted
+
+**Decision:** Phase 1 freezes a `640 × 360`, top-left-origin contract with required Tiled object
+layers, seven visual-zone IDs, twelve stable interaction IDs, player animation keys, depth bands,
+clearance, and parser resource limits. Unknown input is validated before Phaser construction. The
+temporary fixture lives in `tests/fixtures` and is reached at runtime only through a bundled
+allowlist; query parameters and external tileset URLs cannot select assets.
+
+## ADR-007: Arcade bodies with pure movement and reachability rules
+
+**Status:** accepted
+
+**Decision:** Phaser Arcade Physics owns the single player body and static collision bodies. Pure
+functions own movement-vector normalization, depth calculation, reachability sampling, and fixed
+trace calculation so renderer-independent rules have exact unit tests. The player contract also
+freezes sprite origin, body offsets, and the visual feet offset so the pure and Phaser coordinate
+models cannot diverge. Runtime keyboard motion still uses Arcade velocity/collision. Cross-renderer
+evidence advances that live Phaser body at a fixed 60 Hz and compares it with the pure trace oracle
+to detect future body, map, renderer, or timing drift.
+
+## ADR-008: Focus-scoped input and DOM-owned pause controls
+
+**Status:** accepted
+
+**Decision:** A single input controller listens for required keyboard codes only while the game
+surface owns focus. It prevents scrolling only for gameplay-relevant browser keys, clears every
+action on blur, visibility loss, pointer/focus loss, pause, restart, and route exit, and requests a
+state transition rather than owning movement itself. The shell owns the accessible Pause, Resume,
+Restart, and Return to Start controls through typed game commands.
